@@ -54,6 +54,7 @@ WORKDIR /music
 # Switch to non-root user
 USER spotdl
 
+# Download deno
 RUN uv run --project /app --no-dev --frozen --no-sync spotdl --download-deno
 
 # Entrypoint command
