@@ -65,51 +65,18 @@ class Saved(SongList):
 
         metadata = {"name": "Saved tracks", "url": url}
 
-        spotify_client = SpotifyClient()
-        if spotify_client.user_auth is False:  # type: ignore
-            raise SavedError("You must be logged in to use this function")
+        from spotdl.utils.exportify_auth import get_exportify_client
 
         try:
+            logger.info("Initializing Spotify client with Exportify credentials...")
+            spotify_client = get_exportify_client()
             saved_tracks_response = spotify_client.current_user_saved_tracks()
         except Exception as exc:
-            exc_str = str(exc).lower()
-
-            # Catch HTTP 403 Forbidden — Premium required
-            if "403" in exc_str or "forbidden" in exc_str:
-                logger.error(EXPORTIFY_HELP_MESSAGE)
-                raise SavedError(
-                    "Spotify API returned 403 Forbidden when fetching saved tracks. "
-                    "This typically means the app owner's Spotify account does not "
-                    "have Premium. Use Exportify (https://exportify.net) to export "
-                    "your liked songs as a CSV, then run:\n\n"
-                    "    spotdl download --from-csv your_export.csv\n"
-                ) from exc
-
-            # Catch HTTP 401 Unauthorized — token expired or invalid
-            if "401" in exc_str or "unauthorized" in exc_str:
-                logger.error(
-                    "Spotify API returned 401 Unauthorized. "
-                    "Your auth token may have expired. Try logging in again "
-                    "with --user-auth, or use Exportify as a workaround."
-                )
-                raise SavedError(
-                    "Spotify API returned 401 Unauthorized. "
-                    "Try re-authenticating with --user-auth, or use:\n\n"
-                    "    spotdl download --from-csv your_export.csv\n"
-                ) from exc
-
-            # Re-raise other exceptions with helpful context
-            logger.error(
-                "Failed to fetch saved tracks from Spotify API: %s\n"
-                "If this persists, try using Exportify as a workaround:\n"
-                "    spotdl download --from-csv your_export.csv",
-                exc,
-            )
+            logger.error("Failed to authenticate or fetch saved tracks: %s", exc)
             raise SavedError(
                 f"Failed to fetch saved tracks: {exc}\n\n"
-                "If this error persists, use Exportify (https://exportify.net) "
-                "to export your liked songs, then run:\n\n"
-                "    spotdl download --from-csv your_export.csv\n"
+                "Please make sure you authorize the Exportify app in your browser "
+                "and copy/paste the redirection URL correctly."
             ) from exc
 
         if saved_tracks_response is None:

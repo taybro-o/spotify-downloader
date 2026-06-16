@@ -164,17 +164,6 @@ def entry_point():
     ):
         raise DownloaderError("Save file has to end with .spotdl")
 
-    # Check if the user is logged in (skip this check for CSV imports)
-    if (
-        arguments.query
-        and "saved" in arguments.query
-        and not spotify_settings["user_auth"]
-        and not from_csv
-    ):
-        raise SpotifyError(
-            "You must be logged in to use the saved query. "
-            "Log in by adding the --user-auth flag"
-        )
 
     # Initialize the downloader
     # for download, load and preload operations
