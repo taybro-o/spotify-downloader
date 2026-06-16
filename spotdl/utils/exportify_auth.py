@@ -65,7 +65,7 @@ def get_exportify_client() -> spotipy.Spotify:
 
     try:
         # Get the access token (opens browser and prompts if not cached/expired)
-        access_token = auth_manager.get_access_token(as_dict=False)
+        access_token = auth_manager.get_access_token()
     except Exception as exc:
         logger.error("Failed to authenticate with Spotify PKCE: %s", exc)
         raise exc
